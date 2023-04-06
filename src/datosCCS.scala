@@ -1,8 +1,9 @@
-case class datosCundyCroshSoga(opciones: String, modo: String, dificultad: Int, filas: Int, columnas: Int)
-object datosCundyCroshSoga {
-  def apply(opciones: String): datosCundyCroshSoga = {
+case class datosCCS(opciones: String, modo: String, nColores: Int, filas: Int, columnas: Int)
+object datosCCS {
+  def apply(opciones: String): datosCCS = {
     val datos = filtrarDatos(opciones)
-    datosCundyCroshSoga(opciones, datos(0), datos(1).toInt, datos(2).toInt, datos(3).toInt)
+    if (datos(1).toInt == 1) new datosCCS(opciones, datos(0), 4, datos(2).toInt, datos(3).toInt)
+    else new datosCCS(opciones, datos(0), 6, datos(2).toInt, datos(3).toInt)
   }
 }
 
