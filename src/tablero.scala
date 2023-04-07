@@ -13,17 +13,16 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
 
   def imprimirTablero(tablero: List[Int], fila: Int = 0, columna: Int = 0): Unit = {
     if (fila >= 0 && columna >= 0 && fila < filas && columna < columnas) { // Reemplazar 3 por el tamaño del tablero
-      val indice = fila * columnas + columna // Reemplazar 3 por el tamaño del tablero
-      imprimirNumero( tablero(indice) ) // Imprimir el valor de la casilla con marco
+      imprimirNumero( tablero.head ) // Imprimir el valor de la casilla con marco
       if (columna == columnas - 1) {
         println("|") // Imprimir el cierre del marco y una nueva línea después de cada fila
         if (fila < filas - 1) {
           for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
           println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
         }
-        imprimirTablero(tablero, fila + 1, 0) // Llamada recursiva para la siguiente fila
+        imprimirTablero(tablero.tail, fila + 1) // Llamada recursiva para la siguiente fila
       } else {
-        imprimirTablero(tablero, fila, columna + 1) // Llamada recursiva para la siguiente columna
+        imprimirTablero(tablero.tail, fila, columna + 1) // Llamada recursiva para la siguiente columna
       }
     } else if (fila == filas) {
       for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
@@ -32,7 +31,7 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
       println("\nCANDY CROSH SOGA")
       for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
       println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
-      imprimirTablero(tablero, 0, 0)
+      imprimirTablero(tablero)
     }
   }
 
@@ -47,16 +46,12 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
       case 6 => print(s"| \u001B[31m6\u001B[0m ")
       case 7 => print(s"| \u001B[90mB\u001B[0m ")
       case 8 => print(s"| \u001B[33;91mT\u001B[0m ")
-      case _ => {
-        n match {
-          case 10 => print(s"|\u001B[1;37mR1\u001B[0m ")
-          case 20 => print(s"|\u001B[1;32mR2\u001B[0m ")
-          case 30 => print(s"|\u001B[1;33mR3\u001B[0m ")
-          case 40 => print(s"|\u001B[1;34mR4\u001B[0m ")
-          case 50 => print(s"|\u001B[1;35mR5\u001B[0m ")
-          case 60 => print(s"|\u001B[1;36mR6\u001B[0m ")
-        }
-      }
+      case 10 => print(s"|\u001B[1;37mR1\u001B[0m ")
+      case 20 => print(s"|\u001B[1;32mR2\u001B[0m ")
+      case 30 => print(s"|\u001B[1;33mR3\u001B[0m ")
+      case 40 => print(s"|\u001B[1;34mR4\u001B[0m ")
+      case 50 => print(s"|\u001B[1;35mR5\u001B[0m ")
+      case 60 => print(s"|\u001B[1;36mR6\u001B[0m ")
     }
   }
 
