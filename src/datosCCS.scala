@@ -1,4 +1,15 @@
-case class datosCCS(opciones: String, modo: String, nColores: Int, filas: Int, columnas: Int)
+case class datosCCS(opciones: String, modo: String, nColores: Int, filas: Int, columnas: Int){
+  def pedirCoordenada(): (Int, Int) = {
+    // pedimos las coordenadas de la casilla a marcar
+    println("Casilla seleccionada (fila columna):")
+    val coordenadas = scala.io.StdIn.readLine().split(" ").filter(_.nonEmpty)
+    if (coordenadas.length != 2 || !coordenadas(0).forall(_.isDigit) || !coordenadas(1).forall(_.isDigit)) {
+      println("Error en la entrada de datos")
+      throw new Error("Error en la entrada de datos")
+    }
+    (coordenadas(0).toInt, coordenadas(1).toInt)
+  }
+}
 object datosCCS {
   def apply(opciones: String): datosCCS = {
     val datos = filtrarDatos(opciones)
