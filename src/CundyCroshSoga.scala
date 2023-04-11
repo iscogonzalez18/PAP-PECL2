@@ -4,10 +4,11 @@ object CundyCroshSoga {
         println("Introduce las opciones de ejecución (ej: css -a 2 10 50):")
         // creamos el objeto de la clase
         //val opcionesJuego = datosCCS(scala.io.StdIn.readLine())
-        val opcionesJuego = datosCCS("css -a 2 4 20")
+        val opcionesJuego = datosCCS("css -a 2 5 5")
 
         //creamos el tablero
-        val tablero = new tablero(opcionesJuego.filas, opcionesJuego.columnas, opcionesJuego.nColores)
-        tablero.inicializarTablero()
+        val juego = new tablero(opcionesJuego.filas, opcionesJuego.columnas, opcionesJuego.nColores)
+        val tablero = juego.inicializarTablero()
+        juego.partida(tablero, opcionesJuego, 3, 0)
     }
 }

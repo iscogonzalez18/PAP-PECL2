@@ -1,9 +1,37 @@
 import scala.util.Random
 class tablero(filas: Int, columnas: Int, nColores: Int) {
   val random = new Random()
-  def inicializarTablero(): Unit = {
+
+  // se empieza la partida y se desarrolla recursivamente
+  def partida( tablero: List[Int], datos: datosCCS, nVidas: Int, nPuntos: Int ): Unit = {
+    if (nVidas > 0){
+      val coordenadas = datos.pedirCoordenada()
+      val resultadoSeleccion = borrarSeleccion(tablero, coordenadas)
+      val tableroActualizado = resultadoSeleccion(0)
+      val puntos = nPuntos + resultadoSeleccion(1)
+      if (resultadoSeleccion(1) == 1){
+        imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
+        partida(tableroActualizado, datos, nVidas - 1, puntos)
+      }
+      else {
+        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+        partida(tableroActualizado, datos, nVidas, puntos)
+      }
+    } else {
+      println("GAME OVER")
+      println("PUNTUACION: " + nPuntos)
+    }
+  }
+
+  def borrarSeleccion( tablero: List[Int], coordenadas: (Int, Int) ): (List[Int], Int) = {
+    //val tableroBorrado = borrar(tablero, coordenadas)
+    printf("Coordenadas: " + coordenadas)
+    (tablero, 1)
+  }
+  def inicializarTablero(): List[Int] = {
     val tablero = crearTablero(filas * columnas)
-    imprimirTablero(tablero, -1, -1)
+    imprimirTablero(tablero, -1, -1, 3, 0)
+    tablero
   }
 
   def crearTablero(n: Int) : List[Int] ={
@@ -11,7 +39,7 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
     else crearTablero(n-1) :+ (random.nextInt(nColores) + 1)
   }
 
-  def imprimirTablero(tablero: List[Int], fila: Int = 0, columna: Int = 0): Unit = {
+  def imprimirTablero(tablero: List[Int], fila: Int = 0, columna: Int = 0, vidas: Int, puntos: Int): Unit = {
     if (fila >= 0 && columna >= 0 && fila < filas && columna < columnas) { // Reemplazar 3 por el tamaño del tablero
       imprimirNumero( tablero.head ) // Imprimir el valor de la casilla con marco
       if (columna == columnas - 1) {
@@ -20,18 +48,19 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
           for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
           println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
         }
-        imprimirTablero(tablero.tail, fila + 1) // Llamada recursiva para la siguiente fila
+        imprimirTablero(tablero.tail, fila + 1, 0, vidas, puntos) // Llamada recursiva para la siguiente fila
       } else {
-        imprimirTablero(tablero.tail, fila, columna + 1) // Llamada recursiva para la siguiente columna
+        imprimirTablero(tablero.tail, fila, columna + 1, vidas, puntos) // Llamada recursiva para la siguiente columna
       }
     } else if (fila == filas) {
       for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
-      println("+\n") // Imprimir el cierre del marco y una nueva línea después de cada fila
+      println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
+      println("VIDAS: " + vidas + " | PUNTOS: " + puntos + "\n")
     } else if ( fila == -1 && columna == -1) {
-      println("\nCANDY CROSH SOGA")
+      println("\n\nCANDY CROSH SOGA")
       for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
       println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
-      imprimirTablero(tablero)
+      imprimirTablero(tablero, 0, 0, vidas, puntos) // Llamada recursiva para la siguiente fila
     }
   }
 
