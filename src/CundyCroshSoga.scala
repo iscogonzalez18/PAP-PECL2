@@ -7,7 +7,7 @@ object CundyCroshSoga {
         val opcionesJuego = datosCCS("css -a 2 5 5")
 
         //creamos el tablero
-        val juego = new tablero(opcionesJuego.filas, opcionesJuego.columnas, opcionesJuego.nColores)
+        val juego = new juego(opcionesJuego.filas, opcionesJuego.columnas, opcionesJuego.nColores, opcionesJuego.modo)
         val tablero = juego.inicializarTablero()
         juego.partida(tablero, opcionesJuego, 3, 0)
     }

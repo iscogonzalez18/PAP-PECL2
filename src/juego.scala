@@ -1,14 +1,15 @@
 import scala.util.Random
-class tablero(filas: Int, columnas: Int, nColores: Int) {
+class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
   val random = new Random()
 
   // se empieza la partida y se desarrolla recursivamente
   def partida( tablero: List[Int], datos: datosCCS, nVidas: Int, nPuntos: Int ): Unit = {
     if (nVidas > 0){
       val coordenadas = datos.pedirCoordenada()
-      val resultadoSeleccion = borrarSeleccion(tablero, coordenadas)
-      val tableroActualizado = resultadoSeleccion(0)
-      val puntos = nPuntos + resultadoSeleccion(1)
+      println("Fila: " + coordenadas(0) + " Columna: " + coordenadas(1) + " n: " + tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)))
+      val resultadoSeleccion = borrarSeleccion(tablero, coordenadas(0), coordenadas(1), tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)))
+      val tableroActualizado = resultadoSeleccion
+      val puntos = nPuntos + contarCeros(tableroActualizado)
       if (resultadoSeleccion(1) == 1){
         imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
         partida(tableroActualizado, datos, nVidas - 1, puntos)
@@ -23,11 +24,40 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
     }
   }
 
-  def borrarSeleccion( tablero: List[Int], coordenadas: (Int, Int) ): (List[Int], Int) = {
-    //val tableroBorrado = borrar(tablero, coordenadas)
-    printf("Coordenadas: " + coordenadas)
-    (tablero, 1)
+  def borrarSeleccion( tablero: List[Int], fila:Int, columna: Int, n: Int): List[Int] = {
+    println("Fila: " + fila + " Columna: " + columna + " n: " + n + " filas " + filas + " columnas " + columnas)
+    if (tablero((fila - 1) * columnas + (columna - 1)) == n) {
+      val tableroActualizado = tablero.updated((fila - 1) * columnas + (columna - 1), 0)
+      // Arriba
+      if (fila > 1 && tablero(((fila - 1) - 1) * columnas + (columna - 1)) == n) {
+        borrarSeleccion(tableroActualizado, fila - 1, columna, n).updated((fila - 1 - 1) * columnas + (columna - 1), 0)
+      }
+      // Abajo
+      if ((fila - 1) < filas - 1 && tablero(((fila - 1) + 1) * columnas + (columna - 1)) == n) {
+        borrarSeleccion(tableroActualizado, fila + 1, columna, n).updated((fila - 1 + 1) * columnas + (columna - 1), 0)
+      }
+      // Izquierda
+      if ((columna - 1) > 1 && tablero((fila - 1) * columnas + (columna - 1) - 1) == n) {
+        borrarSeleccion(tableroActualizado, fila, columna - 1, n).updated((fila - 1) * columnas + (columna - 1 - 1), 0)
+      }
+      // Derecha
+      if ((columna - 1) < columnas - 1 && tablero((fila - 1) * columnas + (columna - 1) + 1) == n) {
+        borrarSeleccion(tableroActualizado, fila, columna + 1, n).updated((fila - 1) * columnas + (columna - 1 + 1), 0)
+      }
+      tableroActualizado
+    } else {
+        tablero
+    }
   }
+
+  def contarCeros(tablero: List[Int]): Int = {
+    if ( tablero == Nil) 0
+    else if (tablero.head == 0) 1 + contarCeros(tablero.tail)
+    else contarCeros(tablero.tail)
+  }
+
+
+
   def inicializarTablero(): List[Int] = {
     val tablero = crearTablero(filas * columnas)
     imprimirTablero(tablero, -1, -1, 3, 0)
@@ -67,6 +97,7 @@ class tablero(filas: Int, columnas: Int, nColores: Int) {
   def imprimirNumero(n: Int): Unit = {
     // Definir los códigos de color ANSI para los diferentes colores
     n match {
+      case 0 => print(s"| \u001B[90mX\u001B[0m ")
       case 1 => print(s"| \u001B[32m1\u001B[0m ")
       case 2 => print(s"| \u001B[35m2\u001B[0m ")
       case 3 => print(s"| \u001B[36m3\u001B[0m ")
