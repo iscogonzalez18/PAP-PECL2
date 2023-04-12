@@ -23,31 +23,40 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     }
   }
 
-  def borrarSeleccion( tablero: List[Int], fila:Int, columna: Int, n: Int): List[Int] = {
+  def borrarSeleccion(tablero: List[Int], fila: Int, columna: Int, n: Int): List[Int] = {
     println("Fila: " + fila + " Columna: " + columna + " n: " + n + " filas " + filas + " columnas " + columnas)
-    if (tablero((fila - 1) * columnas + (columna - 1)) == n) {
-      val tableroActualizado = tablero.updated((fila - 1) * columnas + (columna - 1), 0)
+    val tableroActualizado = if (tablero((fila - 1) * columnas + (columna - 1)) == n) {
+      val tablero1 = tablero.updated((fila - 1) * columnas + (columna - 1), 0)
       // Arriba
-      if (fila > 1 && tablero(((fila - 1) - 1) * columnas + (columna - 1)) == n) {
-        borrarSeleccion(tableroActualizado, fila - 1, columna, n).updated((fila - 1 - 1) * columnas + (columna - 1), 0)
+      val tablero2 = if (fila > 1 && tablero(((fila - 1) - 1) * columnas + (columna - 1)) == n) {
+        borrarSeleccion(tablero1, fila - 1, columna, n).updated((fila - 1 - 1) * columnas + (columna - 1), 0)
+      } else {
+        tablero1
       }
       // Abajo
-      if ((fila - 1) < filas - 1 && tablero(((fila - 1) + 1) * columnas + (columna - 1)) == n) {
-        borrarSeleccion(tableroActualizado, fila + 1, columna, n).updated((fila - 1 + 1) * columnas + (columna - 1), 0)
+      val tablero3 = if ((fila - 1) < filas - 1 && tablero(((fila - 1) + 1) * columnas + (columna - 1)) == n) {
+        borrarSeleccion(tablero2, fila + 1, columna, n).updated((fila - 1 + 1) * columnas + (columna - 1), 0)
+      } else {
+        tablero2
       }
       // Izquierda
-      if ((columna - 1) > 1 && tablero((fila - 1) * columnas + (columna - 1) - 1) == n) {
-        borrarSeleccion(tableroActualizado, fila, columna - 1, n).updated((fila - 1) * columnas + (columna - 1 - 1), 0)
+      val tablero4 = if ((columna - 1) > 1 && tablero((fila - 1) * columnas + (columna - 1) - 1) == n) {
+        borrarSeleccion(tablero3, fila, columna - 1, n).updated((fila - 1) * columnas + (columna - 1 - 1), 0)
+      } else {
+        tablero3
       }
       // Derecha
       if ((columna - 1) < columnas - 1 && tablero((fila - 1) * columnas + (columna - 1) + 1) == n) {
-        borrarSeleccion(tableroActualizado, fila, columna + 1, n).updated((fila - 1) * columnas + (columna - 1 + 1), 0)
+        borrarSeleccion(tablero4, fila, columna + 1, n).updated((fila - 1) * columnas + (columna - 1 + 1), 0)
+      } else {
+        tablero4
       }
-      tableroActualizado
     } else {
-        tablero
+      tablero
     }
+    tableroActualizado
   }
+
 
   def contarCeros(tablero: List[Int]): Int = {
     if ( tablero == Nil) 0
