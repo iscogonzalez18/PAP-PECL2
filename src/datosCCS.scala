@@ -2,7 +2,7 @@ case class datosCCS(opciones: String, modo: String, nColores: Int, filas: Int, c
   def pedirCoordenada(): (Int, Int) = {
     // pedimos las coordenadas de la casilla a marcar
     println("Seleccione casilla (fila columna):")
-    val coordenadas = scala.io.StdIn.readLine().split(" ").filter(_.nonEmpty)
+    val coordenadas = scala.io.StdIn.readLine().split(" ").filter(_.nonEmpty) // sdafsafsafsafsadfs
     if (coordenadas.length != 2 || !coordenadas(0).forall(_.isDigit) || !coordenadas(1).forall(_.isDigit)) {
       println("Error en la entrada de datos")
       throw new Error("Error en la entrada de datos")
