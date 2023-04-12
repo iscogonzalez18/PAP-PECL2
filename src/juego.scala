@@ -7,10 +7,9 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     if (nVidas > 0){
       val coordenadas = datos.pedirCoordenada()
       println("Fila: " + coordenadas(0) + " Columna: " + coordenadas(1) + " n: " + tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)))
-      val resultadoSeleccion = borrarSeleccion(tablero, coordenadas(0), coordenadas(1), tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)))
-      val tableroActualizado = resultadoSeleccion
+      val tableroActualizado = borrarSeleccion(tablero, coordenadas(0), coordenadas(1), tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)))
       val puntos = nPuntos + contarCeros(tableroActualizado)
-      if (resultadoSeleccion(1) == 1){
+      if (puntos == 1){
         imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
         partida(tableroActualizado, datos, nVidas - 1, puntos)
       }
