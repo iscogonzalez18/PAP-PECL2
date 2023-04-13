@@ -47,7 +47,7 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
       // Se comprueba posicion de abajo
       // si nos interesa porque es el mismo numero que buscamos se vuelve a llamar a la funcion y se actualizará
       // si no, tablero3 se quedará con el valor de tablero2
-      val tablero3 = if ((fila - 1) < filas - 1 && tablero(((fila - 1) + 1) * columnas + (columna - 1)) == n) {
+      val tablero3 = if (fila < filas && tablero(((fila - 1) + 1) * columnas + (columna - 1)) == n) {
         borrarSeleccion(tablero2, fila + 1, columna, n).updated((fila - 1 + 1) * columnas + (columna - 1), 0)
       } else {
         tablero2
@@ -55,7 +55,7 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
       // Se comprueba posicion de izquierda
       // si nos interesa porque es el mismo numero que buscamos se vuelve a llamar a la funcion y se actualizará
       // si no, tablero4 se quedará con el valor de tablero3
-      val tablero4 = if ((columna - 1) > 1 && tablero((fila - 1) * columnas + (columna - 1) - 1) == n) {
+      val tablero4 = if (columna > 1 && tablero((fila - 1) * columnas + (columna - 1) - 1) == n) {
         borrarSeleccion(tablero3, fila, columna - 1, n).updated((fila - 1) * columnas + (columna - 1 - 1), 0)
       } else {
         tablero3
@@ -63,7 +63,7 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
       // Se comprueba posicion de derecha
       // si nos interesa porque es el mismo numero que buscamos se vuelve a llamar a la funcion y se actualizará
       // ya no almacenamos una nueva variable ya que sea lo que sea devolverá o lo que nos devuelve la función o el valor de tablero4
-      if ((columna - 1) < columnas - 1 && tablero((fila - 1) * columnas + (columna - 1) + 1) == n) {
+      if (columna < columnas && tablero((fila - 1) * columnas + (columna - 1) + 1) == n) {
         borrarSeleccion(tablero4, fila, columna + 1, n).updated((fila - 1) * columnas + (columna - 1 + 1), 0)
       } else {
         tablero4
@@ -76,15 +76,36 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
 }
 
   def gravedad( tablero: List[Int], vidas: Int, puntos: Int): List[Int] = {
-    val tableroGravedad = gravedadColumnas(subirCeros, tablero, 0)
+    val tableroCuadrado = if (filas == columnas) tablero else rellenarTablero(tablero)
+    val tableroGravedad = gravedadColumnas(subirCeros, tableroCuadrado, 0)
     val tableroActualizado = randomNumeros(random.nextInt(nColores) + 1, traspuesta(tableroGravedad))
-    println("Tablero Actualizado")
-    imprimirTablero(tableroActualizado, -1, -1, vidas, puntos)
-    tableroActualizado
+    // se vuelve a quitar el exceso de filas o columnas
+    val tableroFinal = if (filas == columnas) tableroActualizado else quitarNueves(tableroActualizado)
+    imprimirTablero(tableroFinal, -1, -1, vidas, puntos)
+    tableroFinal
+  }
+
+  // quita las casillas rellenadas con 9 para obtener el tablero original
+  def quitarNueves(tablero: List[Int]): List[Int] = {
+    if (tablero == Nil) Nil
+    else if (tablero.head == 9) quitarNueves(tablero.tail)
+    else tablero.head :: quitarNueves(tablero.tail)
+  }
+
+  // devuelve el tablero cuadrado para poder aplicar la trasposicion
+  def rellenarTablero(tablero: List[Int]): List[Int] = {
+    if (filas > columnas) rellenarColumnas(tablero, 0, filas - columnas)
+    else concatenarListas(tablero, generar((columnas - filas) * columnas))
+  }
+
+  // rellena las columnas del tablero
+  def rellenarColumnas(tablero: List[Int], i: Int, cantidad: Int): List[Int] = {
+    if (i == mayor(filas, columnas)) Nil
+    else concatenarListas(concatenarListas(getFila(i, tablero), generar(cantidad)), rellenarColumnas(tablero, i + 1, cantidad))
   }
 
   def gravedadColumnas(f: List[Int] => List[Int], tablero: List[Int], i: Int): List[Int] = {
-    if (i == columnas) Nil
+    if (i == mayor(filas, columnas)) Nil
     else concatenarListas(f(getColumna(i, tablero)),gravedadColumnas(f, tablero, i + 1))
   }
 
@@ -102,15 +123,28 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
 
   // obtener el elemento de una matriz segun index
   def getElem(index: Int, l: List[Int]): Int = {
-    if (index > l.length - 1) throw new Error("Out of Index")
+    if (index > tamano(l) - 1) throw new Error("Out of Index")
     else l(index)
   }
 
   // coje una columna del tablero
   def getColumna(columna: Int, l: List[Int]): List[Int] = {
-    if (columna > columnas - 1) throw new Error("Columna out of index")
+    if (columna > mayor(filas, columnas) - 1) throw new Error("Columna out of index")
     else if (l == Nil) Nil
-    else getElem(columna, toma(filas, l)) :: getColumna(columna, deja(filas, l))
+    else getElem(columna, toma(mayor(filas, columnas), l)) :: getColumna(columna, deja(mayor(filas, columnas), l))
+  }
+
+  // coje una fila del tablero
+  def getFila(fila: Int, l: List[Int]): List[Int] = {
+    if (fila > tamano(l) / columnas - 1) throw new Error("Fila out of index")
+    else if (fila == 0) toma(columnas, l)
+    else getFila(fila - 1, deja(columnas, l))
+  }
+
+  // genera una lista de n elementos
+  def generar(n: Int): List[Int] = {
+    if (n == 0) Nil
+    else generar(n - 1) :+ 9
   }
 
   // pone los ceros al principio del array
@@ -126,7 +160,7 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
   }
 
   def trasp_aux(matriz: List[Int], columnaActual: Int): List[Int] = {
-    if (columnaActual > columnas - 1) Nil
+    if (columnaActual > mayor(filas, columnas) - 1) Nil
     else concatenarListas(getColumna(columnaActual, matriz),trasp_aux(matriz, columnaActual + 1))
   }
 
@@ -135,10 +169,23 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     else trasp_aux(l, 0)
   }
 
+  // se rellena la matriz con numeros aleatorios
   def randomNumeros(f: => Int, tablero: List[Int] ): List[Int] = {
     if (tablero == Nil) Nil
     else if (tablero.head == 0) f :: randomNumeros(f, tablero.tail)
     else tablero.head :: randomNumeros(f, tablero.tail)
+  }
+
+  // devuelve el entero mas alto
+  def mayor(a: Int, b: Int): Int = {
+    if (a > b) a
+    else b
+  }
+
+  // devuelve el tamaño de una lista
+  def tamano(l: List[Int]): Int = {
+    if (l == Nil) 0
+    else 1 + tamano(l.tail)
   }
 
   def numIgualesAdyacentes(tablero: List[Int], fila: Int, columna: Int, filas: Int, columnas: Int, num: Int): Int = {
