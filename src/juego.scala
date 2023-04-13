@@ -22,7 +22,7 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
         // Se llama recursivamente a la funcion partida
         partida(gravedad(tableroActualizado, nVidas - 1, puntos), datos, nVidas - 1, puntos)
       }
-      else if (puntos - nPuntos < 3){
+      else if (puntos - nPuntos < 5){
         imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
         // Se llama recursivamente a la funcion partida
         partida(gravedad(tableroActualizado, nVidas, puntos), datos, nVidas, puntos)
@@ -91,15 +91,13 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
   }
 
   def borrarSeleccionEspecial(tablero: List[Int], fila:Int, columna: Int, n: Int): List[Int] = {
-    val tableroCuadrado = if (filas == columnas) tablero else rellenarTablero(tablero)
     val tableroEspecial = if (n == 7) {
+      val tableroCuadrado = if (filas == columnas) tablero else rellenarTablero(tablero)
       traspuesta(bomba(tableroCuadrado, fila, columna))
     } else if (n == 8) {
-      //tnt(tablero, fila, columna)
-      tablero
+      tnt(tablero, 0, fila, columna)
     } else {
-      //rompecabezas(tablero, fila, columna)
-      tablero
+      rompecabezas(tablero, n)
     }
     if (filas == columnas) tableroEspecial else quitarNueves(tableroEspecial)
   }
@@ -123,10 +121,24 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     else concatenarListas(getColumna(i,tablero), columnaBomba(tablero, columna, i + 1))
   }
 
+  // pone a cero las casillas que se encuentren en un radio de 4 casillas de la casilla seleccionada
+  def tnt(tablero: List[Int], pos: Int, fila: Int, columna: Int): List[Int] = {
+    if (tablero == Nil) Nil
+    else if(( pos / columnas + 1) > fila - 4 && ( pos / columnas + 1) < fila + 4 && (pos % columnas + 1) > columna - 4 && (pos % columnas + 1) < columna + 4) {
+      concatenarListas(generar0(1,0), tnt(deja(1, tablero), pos + 1, fila, columna))
+    }
+    else concatenarListas(toma(1, tablero), tnt(deja(1, tablero), pos + 1, fila, columna))
+  }
+
+  def rompecabezas( tablero: List[Int], n: Int): List[Int] = {
+    if (tablero == Nil) Nil
+    else if (tablero.head == n / 10 || tablero.head == n) concatenarListas(generar0(1,0), rompecabezas(deja(1, tablero), n))
+    else concatenarListas(toma(1, tablero), rompecabezas(deja(1, tablero), n))
+  }
 
   def insertarEspecial(tablero: List[Int], n: Int, fila: Int, columna: Int): List[Int] = {
     // se comprueba la cantidad de ceros
-    val tableroEspecial = if (n >= 3) {
+    val tableroEspecial = if (n == 5) {
       // si solo hay un cero se inserta una bomba
       tablero.updated((fila - 1) * columnas + (columna - 1), 7)
     } else if (n == 6) {
