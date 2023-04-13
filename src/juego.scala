@@ -13,19 +13,19 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
       // Se cuentan los 0 que hay en el tablero
       val puntos = nPuntos + contarCeros(tableroActualizado)
       // Si solo se ha conseguido un punto se resta una vida
-      if (puntos == 1){
+      if (puntos - nPuntos == 1){
         imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
         // Se llama recursivamente a la funcion partida
-        partida(tableroActualizado, datos, nVidas - 1, puntos)
+        partida(gravedad(tableroActualizado, nVidas - 1, puntos), datos, nVidas - 1, puntos)
       }
       else {
         imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
         // Se llama recursivamente a la funcion partida
-        partida(tableroActualizado, datos, nVidas, puntos)
+        partida(gravedad(tableroActualizado, nVidas, puntos), datos, nVidas, puntos)
       }
     } else {
       println("GAME OVER")
-      println("PUNTUACION: " + puntos)
+      println("PUNTUACION: " + nPuntos)
     }
   }
 
@@ -75,21 +75,16 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     tableroActualizado
 }
 
-  def gravedad( tablero: List[Int] ): List[Int] = {
+  def gravedad( tablero: List[Int], vidas: Int, puntos: Int): List[Int] = {
     val tableroGravedad = gravedadColumnas(subirCeros, tablero, 0)
-    println("Gravedad Columnas")
-    imprimirTablero(tableroGravedad, -1, -1, 3, 0)
-    val tableroTraspuesto = traspuesta(tableroGravedad)
-    println("Traspuesta")
-    imprimirTablero(tableroTraspuesto, -1, -1, 3, 0)
-    val tableroActualizado = randomNumeros(random.nextInt(nColores) + 1, tablero)
+    val tableroActualizado = randomNumeros(random.nextInt(nColores) + 1, traspuesta(tableroGravedad))
     println("Tablero Actualizado")
-    imprimirTablero(tableroActualizado, -1, -1, 3, 0)
+    imprimirTablero(tableroActualizado, -1, -1, vidas, puntos)
     tableroActualizado
   }
 
   def gravedadColumnas(f: List[Int] => List[Int], tablero: List[Int], i: Int): List[Int] = {
-    if (i == columnas - 1) Nil
+    if (i == columnas) Nil
     else concatenarListas(f(getColumna(i, tablero)),gravedadColumnas(f, tablero, i + 1))
   }
 
@@ -108,21 +103,26 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
   // obtener el elemento de una matriz segun index
   def getElem(index: Int, l: List[Int]): Int = {
     if (index > l.length - 1) throw new Error("Out of Index")
-    else return l(index)
+    else l(index)
   }
 
   // coje una columna del tablero
   def getColumna(columna: Int, l: List[Int]): List[Int] = {
     if (columna > columnas - 1) throw new Error("Columna out of index")
     else if (l == Nil) Nil
-    else getElem(columna, toma(8, l)) :: getColumna(columna, deja(8, l))
+    else getElem(columna, toma(filas, l)) :: getColumna(columna, deja(filas, l))
   }
 
   // pone los ceros al principio del array
-  def subirCeros(tablero: List[Int]): List[Int] = {
-    if (tablero == Nil) Nil
-    else if (tablero.head == 0) 0 :: subirCeros(tablero.tail)
-    else tablero.head :: subirCeros(tablero.tail)
+  def subirCeros(columna: List[Int]): List[Int] = {
+    subirCerosAux(columna, contarCeros(columna))
+  }
+
+  def subirCerosAux(columna: List[Int], n: Int): List[Int] = {
+    if (columna == Nil) Nil
+    else if (n > 0) 0 :: subirCerosAux(columna, n - 1)
+    else if (columna.head == 0) subirCerosAux(columna.tail, n)
+    else columna.head :: subirCerosAux(columna.tail, n)
   }
 
   def trasp_aux(matriz: List[Int], columnaActual: Int): List[Int] = {
