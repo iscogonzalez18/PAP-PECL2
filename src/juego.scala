@@ -288,10 +288,71 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     arribaIgual + abajoIgual + izquierdaIgual + derechaIgual
   }
 
+  def hipoteticosExplotados(tablero: List[Int], fila: Int, columna: Int): Int = {
+    val n = tablero(fila * columnas + columna)
+    if (n == 7) {
+      val actualizado = bomba(tablero, fila, columna)
+      contarCeros(actualizado)
+    }
+    else if (n == 8){
+      val actualizado = tnt(tablero, 0, fila, columna)
+      contarCeros(actualizado)
+    }
+    else if (n == 10) {
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else if (n == 20){
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else if (n == 30){
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else if (n == 40){
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else if (n == 50){
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else if (n == 60){
+      val actualizado = rompecabezas(tablero, n)
+      contarCeros(actualizado)
+    }
+    else 0
+  }
 
-  //def buscarCoordenadaIdeal
+  def buscarCoordenadaIdeal (tablero: List[Int], filaIdeal: Int, columnaIdeal: Int, filaABuscar: Int, columnaABuscar: Int, filas: Int, columnas: Int, num: Int, max: Int): (Int, Int) = {
 
-  def contarCeros(tablero: List[Int]): Int = {
+    if ((filaABuscar-1) * columnas + columnaABuscar > filas * columnas) {
+      (filaIdeal - 1, columnaIdeal) // se alcanzó el final del tablero, se devuelve la coordenada anterior
+    } else {
+
+      val tableroParaComprobar = tablero.toList
+      val adyacentesActual = if (num > 0 && num < 7) numIgualesAdyacentes(tableroParaComprobar, filaABuscar, columnaABuscar, filas, columnas, num) else if (num==7 || num ==8 || num==10 || num == 20 || num == 30 || num == 40 || num == 50 || num == 60) hipoteticosExplotados(tableroParaComprobar, filaABuscar, columnaABuscar) else 0
+
+      if (adyacentesActual > max) {
+        if (columnaABuscar == columnas) {
+          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar + 1, 0, filas, columnas, num, adyacentesActual) // se busca en la siguiente fila
+        } else {
+          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar, columnaABuscar + 1, filas, columnas, num, adyacentesActual)
+        }
+      } else {
+        if (columnaABuscar == columnas) {
+          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar + 1, 0, filas, columnas, num, max) // se busca en la siguiente fila
+        } else {
+          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar, columnaABuscar + 1, filas, columnas, num, max)
+        }
+      }
+    }
+  }
+
+
+
+  def contarCeros(tablero:List[Int]): Int = {
     if ( tablero == Nil) 0
     else if (tablero.head == 0) 1 + contarCeros(tablero.tail)
     else contarCeros(tablero.tail)
