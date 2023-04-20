@@ -1,18 +1,19 @@
+import scala.:+
 import scala.util.Random
-class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
+class juego(filas: Int, columnas: Int, nColores: Int) {
   val random = new Random()
 
   // se empieza la partida y se desarrolla recursivamente
-  def partida( tablero: List[Int], datos: datosCCS, nVidas: Int, nPuntos: Int ): Unit = {
+  def partidaManual( tablero: List[Int], datos: datosCCS, nVidas: Int, nPuntos: Int ): Unit = {
     // Se comprueba el numero de vidas restantes
     if (nVidas > 0){
       // Se piden las coordenadas de la casilla a seleccionar
       val coordenadas = datos.pedirCoordenada()
       // Se actualiza el tablero con las casillas adyacentes que sean iguales a la seleccionada dando el valor 0
-      val (tableroActualizado,especial) = if(0 < tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)) && tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1)) < 7) {
-        (borrarSeleccion(tablero, coordenadas(0), coordenadas(1), tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1))), false)
+      val (tableroActualizado,especial) = if(0 < tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) && tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) < 7) {
+        (borrarSeleccion(tablero, coordenadas._1, coordenadas._2, tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), false)
       } else {
-        (borrarSeleccionEspecial( tablero, coordenadas(0), coordenadas(1), tablero((coordenadas(0) - 1) * columnas + (coordenadas(1) - 1))), true)
+        (borrarSeleccionEspecial( tablero, coordenadas._1, coordenadas._2, tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), true)
       }
       // Se cuentan los 0 que hay en el tablero
       val puntos = nPuntos + contarCeros(tableroActualizado)
@@ -20,23 +21,71 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
       if (puntos - nPuntos == 1){
         imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
         // Se llama recursivamente a la funcion partida
-        partida(gravedad(tableroActualizado, nVidas - 1, puntos), datos, nVidas - 1, puntos)
+        partidaManual(gravedad(tableroActualizado, nVidas - 1, puntos), datos, nVidas - 1, puntos)
       }
       else if (puntos - nPuntos < 5){
         imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
         // Se llama recursivamente a la funcion partida
-        partida(gravedad(tableroActualizado, nVidas, puntos), datos, nVidas, puntos)
+        partidaManual(gravedad(tableroActualizado, nVidas, puntos), datos, nVidas, puntos)
       }
       else {
         imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
         val tableroEspecial = if(!especial){
-          insertarEspecial(tableroActualizado, puntos - nPuntos, coordenadas(0), coordenadas(1))
+          insertarEspecial(tableroActualizado, puntos - nPuntos, coordenadas._1, coordenadas._2)
         } else {
           tableroActualizado
         }
         // se inserta la casilla especial: bomba, tnt o rompecabezas
         // Se llama recursivamente a la funcion partida
-        partida(gravedad(tableroEspecial, nVidas, puntos), datos, nVidas, puntos)
+        partidaManual(gravedad(tableroEspecial, nVidas, puntos), datos, nVidas, puntos)
+      }
+    } else {
+      println("GAME OVER")
+      println("PUNTUACION: " + nPuntos)
+    }
+  }
+
+  // se empieza la partida y se desarrolla recursivamente
+  def partidaAutomatica(tablero: List[Int], datos: datosCCS, nVidas: Int, nPuntos: Int): Unit = {
+    // Se comprueba el numero de vidas restantes
+    if (nVidas > 0) {
+      // Se buscan las coordenadas ideales para explotar bloques, las que mas puntos den
+      val visitados: List[Int] = List()
+      val buscar = buscarCoordenadaIdeal(tablero,1,1,1,1,datos.filas,datos.columnas,0,visitados)
+      val coordenadas = (buscar._1,buscar._2)
+      println("Coordenadas seleccionadas: " + coordenadas._1 + " " + coordenadas._2)
+      // Se actualiza el tablero con las casillas adyacentes que sean iguales a la seleccionada dando el valor 0
+      val (tableroActualizado, especial) = if (0 < tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) && tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) < 7) {
+        (borrarSeleccion(tablero, coordenadas._1, coordenadas._2, tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), false)
+      } else {
+        (borrarSeleccionEspecial(tablero, coordenadas._1, coordenadas._2, tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), true)
+      }
+      // Se cuentan los 0 que hay en el tablero
+      val puntos = nPuntos + contarCeros(tableroActualizado)
+      // Si solo se ha conseguido un punto se resta una vida
+      if (puntos - nPuntos == 1) {
+        imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
+        // Se llama recursivamente a la funcion partida
+        Thread.sleep(5000)
+        partidaAutomatica(gravedad(tableroActualizado, nVidas - 1, puntos), datos, nVidas - 1, puntos)
+      }
+      else if (puntos - nPuntos < 5) {
+        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+        // Se llama recursivamente a la funcion partida
+        Thread.sleep(5000)
+        partidaAutomatica(gravedad(tableroActualizado, nVidas, puntos), datos, nVidas, puntos)
+      }
+      else {
+        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+        val tableroEspecial = if (!especial) {
+          insertarEspecial(tableroActualizado, puntos - nPuntos, coordenadas._1, coordenadas._2)
+        } else {
+          tableroActualizado
+        }
+        // se inserta la casilla especial: bomba, tnt o rompecabezas
+        // Se llama recursivamente a la funcion partida
+        Thread.sleep(5000)
+        partidaAutomatica(gravedad(tableroEspecial, nVidas, puntos), datos, nVidas, puntos)
       }
     } else {
       println("GAME OVER")
@@ -273,23 +322,77 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     case _ :: tail => 1 + tamano(tail) // Caso recursivo: tamaño es 1 + tamaño de la cola
   }
 
+  /*
   def numIgualesAdyacentes(tablero: List[Int], fila: Int, columna: Int, filas: Int, columnas: Int, num: Int): Int = {
-    val actual = fila * columnas + columna
-    val arriba = if (fila > 0) (fila - 1) * columnas + columna else -1
-    val abajo = if (fila < filas - 1) (fila + 1) * columnas + columna else -1
-    val izquierda = if (columna > 0) fila * columnas + (columna - 1) else -1
-    val derecha = if (columna < columnas - 1) fila * columnas + (columna + 1) else -1
-    
+    val filaComprobar = fila - 1
+    val columnaComprobar = columna - 1
+    val arriba = if (fila > 0) (filaComprobar - 1) * columnas + columnaComprobar else -1
+    val abajo = if (fila < filas - 1) (filaComprobar + 1) * columnas + columnaComprobar else -1
+    val izquierda = if (columna > 0) filaComprobar * columnas + (columnaComprobar - 1) else -1
+    val derecha = if (columna < columnas - 1) filaComprobar * columnas + (columnaComprobar + 1) else -1
+
+
+
     val arribaIgual = if (arriba != -1 && tablero(arriba) == num) 1 + numIgualesAdyacentes(tablero, fila - 1, columna, filas, columnas, num) else 0
     val abajoIgual = if (abajo != -1 && tablero(abajo) == num) 1 + numIgualesAdyacentes(tablero, fila + 1, columna, filas, columnas, num) else 0
     val izquierdaIgual = if (izquierda != -1 && tablero(izquierda) == num) 1 + numIgualesAdyacentes(tablero, fila, columna - 1, filas, columnas, num) else 0
     val derechaIgual = if (derecha != -1 && tablero(derecha) == num) 1 + numIgualesAdyacentes(tablero, fila, columna + 1, filas, columnas, num) else 0
-    
+
     arribaIgual + abajoIgual + izquierdaIgual + derechaIgual
+  }*/
+
+  def numIgualesAdyacentes(tablero: List[Int], fila: Int, columna: Int, filas: Int, columnas: Int, num: Int, previos: List[Int]): (Int, List[Int]) = {
+    val actual = (fila - 1) * columnas + (columna - 1)
+    val n = tablero(actual)
+    val filaComprobar = fila - 1
+    val columnaComprobar = columna - 1
+
+
+    val arriba = if (fila > 1) (filaComprobar - 1) * columnas + columnaComprobar else -1
+    val abajo = if (fila < filas) (filaComprobar + 1) * columnas + columnaComprobar else -1
+    val izquierda = if (columna > 1) filaComprobar * columnas + (columnaComprobar - 1) else -1
+    val derecha = if (columna < columnas) filaComprobar * columnas + (columnaComprobar + 1) else -1
+
+    val pLista =  actual :: previos
+
+    val adyacentesArriba =
+      if (arriba != -1 && tablero(arriba) == num && !pLista.contains(arriba))
+        (1 + numIgualesAdyacentes(tablero, fila - 1, columna, filas, columnas, n, pLista)._1, numIgualesAdyacentes(tablero, fila - 1, columna, filas, columnas, n, pLista)._2)
+      else (0,pLista)
+
+    val arribaIgual = adyacentesArriba._1
+    val previosNuevo = adyacentesArriba._2
+
+    val adyacentesAbajo =
+      if (abajo != -1 && tablero(abajo) == num && !previosNuevo.contains(abajo))
+        (1+ numIgualesAdyacentes(tablero, fila + 1, columna, filas, columnas, n, previosNuevo)._1, numIgualesAdyacentes(tablero, fila + 1, columna, filas, columnas, n, previosNuevo)._2)
+      else (arribaIgual,previosNuevo)
+
+    val abajoIgual = adyacentesAbajo._1
+    val previosNuevo2 = adyacentesAbajo._2
+
+    val adyacentesIzquierda =
+      if (izquierda != -1 && tablero(izquierda) == num && !previosNuevo2.contains(izquierda))
+        (1+ numIgualesAdyacentes(tablero, fila, columna - 1, filas, columnas, n, previosNuevo2)._1, numIgualesAdyacentes(tablero, fila, columna - 1, filas, columnas, n, previosNuevo2)._2)
+      else (abajoIgual,previosNuevo2)
+
+    val izquierdaIgual = adyacentesIzquierda._1
+    val previosNuevo3 = adyacentesIzquierda._2
+
+    val adyacentesDerecha =
+      if (derecha != -1 && tablero(derecha) == num && !previosNuevo3.contains(derecha))
+        (1+ numIgualesAdyacentes(tablero, fila, columna + 1, filas, columnas, n, previosNuevo3)._1, numIgualesAdyacentes(tablero, fila, columna + 1, filas, columnas, n, previosNuevo3)._2)
+      else (izquierdaIgual,previosNuevo3)
+
+    val derechaIgual = adyacentesDerecha._1
+    val previosNuevo4 = adyacentesDerecha._2
+
+    (derechaIgual, previosNuevo4)
   }
 
+
   def hipoteticosExplotados(tablero: List[Int], fila: Int, columna: Int): Int = {
-    val n = tablero(fila * columnas + columna)
+    val n = tablero((fila-1) * columnas + (columna-1))
     if (n == 7) {
       val actualizado = bomba(tablero, fila, columna)
       contarCeros(actualizado)
@@ -325,26 +428,28 @@ class juego(filas: Int, columnas: Int, nColores: Int, modo: String) {
     else 0
   }
 
-  def buscarCoordenadaIdeal (tablero: List[Int], filaIdeal: Int, columnaIdeal: Int, filaABuscar: Int, columnaABuscar: Int, filas: Int, columnas: Int, num: Int, max: Int): (Int, Int) = {
+  def buscarCoordenadaIdeal (tablero: List[Int], filaIdeal: Int, columnaIdeal: Int, filaABuscar: Int, columnaABuscar: Int, filas: Int, columnas: Int, max: Int, visitados: List[Int]): (Int, Int, List[Int]) = {
 
-    if ((filaABuscar-1) * columnas + columnaABuscar > filas * columnas) {
-      (filaIdeal - 1, columnaIdeal) // se alcanzó el final del tablero, se devuelve la coordenada anterior
+    if (visitados.length == (filas * columnas)) {
+      (filaIdeal, columnaIdeal, visitados) // se alcanzó el final del tablero, se devuelve la coordenada anterior
     } else {
 
       val tableroParaComprobar = tablero.toList
-      val adyacentesActual = if (num > 0 && num < 7) numIgualesAdyacentes(tableroParaComprobar, filaABuscar, columnaABuscar, filas, columnas, num) else if (num==7 || num ==8 || num==10 || num == 20 || num == 30 || num == 40 || num == 50 || num == 60) hipoteticosExplotados(tableroParaComprobar, filaABuscar, columnaABuscar) else 0
+      val num = tablero((filaABuscar-1) * columnas + (columnaABuscar-1))
+      val actual = (filaABuscar-1) * columnas + (columnaABuscar-1)
+      val (adyacentesActual, lista) = if (num > 0 && num < 7 && !visitados.contains(actual)) numIgualesAdyacentes(tableroParaComprobar, filaABuscar, columnaABuscar, filas, columnas, num, visitados) else if (num==7 || num ==8 || num==10 || num == 20 || num == 30 || num == 40 || num == 50 || num == 60) (hipoteticosExplotados(tableroParaComprobar, filaABuscar, columnaABuscar), actual::visitados) else (0, visitados)
 
       if (adyacentesActual > max) {
         if (columnaABuscar == columnas) {
-          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar + 1, 0, filas, columnas, num, adyacentesActual) // se busca en la siguiente fila
+          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar + 1, 1, filas, columnas, adyacentesActual,lista) // se busca en la siguiente fila
         } else {
-          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar, columnaABuscar + 1, filas, columnas, num, adyacentesActual)
+          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar, columnaABuscar + 1, filas, columnas, adyacentesActual,lista)
         }
       } else {
         if (columnaABuscar == columnas) {
-          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar + 1, 0, filas, columnas, num, max) // se busca en la siguiente fila
+          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar + 1, 1, filas, columnas, max, lista) // se busca en la siguiente fila
         } else {
-          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar, columnaABuscar + 1, filas, columnas, num, max)
+          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar, columnaABuscar + 1, filas, columnas, max, lista)
         }
       }
     }
