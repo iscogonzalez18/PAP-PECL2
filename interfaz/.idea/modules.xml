@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/PAP-PECL2.iml" filepath="$PROJECT_DIR$/PAP-PECL2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/interfaz.iml" filepath="$PROJECT_DIR$/interfaz.iml" />
     </modules>
   </component>
 </project>
