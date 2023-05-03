@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 
 public class InicioJuego implements ActionListener {
 
+    private JFrame frame;
     private JLabel imagen;
     private JLabel modoDeJuegoLabel;
     private JLabel dificultadLabel;
@@ -19,6 +20,13 @@ public class InicioJuego implements ActionListener {
     private JButton JUGARButton;
     private JPanel panelInicio;
 
+    private String modo;
+    private int nColores;
+    private int filas;
+    private int columnas;
+    private boolean accionCompletada;
+
+
 
     public InicioJuego() {
         try{
@@ -29,7 +37,7 @@ public class InicioJuego implements ActionListener {
     }
 
     public void jbInit () {
-        JFrame frame = new JFrame("Cundy Crosh Soga");
+        frame = new JFrame("Cundy Crosh Soga");
         frame.setResizable(false);
         frame.setContentPane(panelInicio);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -38,6 +46,7 @@ public class InicioJuego implements ActionListener {
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         JUGARButton.addActionListener(this::actionPerformed);
+        boolean accionCompletada = false;
     }
 
     @Override
@@ -48,15 +57,61 @@ public class InicioJuego implements ActionListener {
         String valorFilas = filasField.getText();
         String valorColumnas = columnasField.getText();
 
-        if (valorModo.equals("Manual")){
-            String modo = "Manual";
-            if (valorDificultad.equals("Fácil (4 colores)")) {
-            }//String
-        }else if (valorModo.equals("Automático")){
-            //String modo = "Automático";
-            if (valorDificultad.equals("Fácil (4 colores)")){
-
-            }
+        // Verificar si los campos están vacíos
+        if (valorFilas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Error: tienes que indicar el número de filas");
+            return;
         }
+
+        if (valorColumnas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Error: tienes que indicar el número de columnas");
+            return;
+        }
+
+        try {
+            filas = Integer.parseInt(valorFilas);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Error: El valor de filas debe ser un número entero");
+            return;
+        }
+
+        try {
+            columnas = Integer.parseInt(valorColumnas);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Error: El valor de columnas debe ser un número entero");
+            return;
+        }
+
+        // Asignar los valores a las variables correspondientes
+        nColores = valorDificultad.equals("Fácil (4 colores)") ? 4 : 6;
+        modo = valorModo.equals("Manual") ? "m" : "a";
+
+        accionCompletada = true;
+        ocultar();
     }
+
+    public String getModo(){
+        return modo;
+    }
+
+    public int getNColores(){
+        return nColores;
+    }
+
+    public int getFilas(){
+        return filas;
+    }
+
+    public int getColumnas(){
+        return columnas;
+    }
+
+    public boolean getAccionCompletada(){
+        return accionCompletada;
+    }
+
+    public void ocultar (){
+        frame.setVisible(false);
+    }
+
 }
