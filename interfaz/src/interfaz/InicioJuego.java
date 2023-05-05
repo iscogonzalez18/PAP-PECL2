@@ -87,7 +87,6 @@ public class InicioJuego implements ActionListener {
         modo = valorModo.equals("Manual") ? "m" : "a";
 
         accionCompletada = true;
-        ocultar();
     }
 
     public String getModo(){

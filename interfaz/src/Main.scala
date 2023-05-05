@@ -1,4 +1,4 @@
-import interfaz.{InicioJuego, MainFrame}
+import interfaz.{Ejemplo, InicioJuego}
 
 import javax.swing._
 
@@ -10,6 +10,7 @@ object Main {
     while (!inicio.getAccionCompletada) {
       Thread.sleep(100)
     }
+    inicio.ocultar()
 
     val modo = inicio.getModo()
     val nColores = inicio.getNColores()
@@ -20,5 +21,9 @@ object Main {
     println(filas)
     println(columnas)
     inicio.ocultar()
+
+    val juego=new Juego(filas, columnas, nColores)
+    //val tablero = new Tablero()
+    val ejemplo = new Ejemplo(filas, columnas, nColores)
   }
 }
