@@ -1,6 +1,6 @@
 import scala.:+
 import scala.util.Random
-class juego(filas: Int, columnas: Int, nColores: Int) {
+class juego(filas: Int, columnas: Int, nColores: Int, dificultad: Int) {
   val random = new Random()
 
   // se empieza la partida manual y se desarrolla recursivamente
@@ -9,30 +9,45 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
     if (nVidas > 0){
       // Se piden las coordenadas de la casilla a seleccionar
       val coordenadas = pedirCoordenadas()
+      val valorSeleccionado = getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))
       // Se actualiza el tablero con las casillas adyacentes que sean iguales a la seleccionada dando el valor 0
       val (tableroActualizado,especial) = if(0 < getElem(tablero,(coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) && getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) < 7) {
         (borrarSeleccion(tablero, coordenadas._1, coordenadas._2, tablero((coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), false)
       } else {
         (borrarSeleccionEspecial( tablero, coordenadas._1, coordenadas._2, getElem(tablero,(coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))),true)
       }
+      // puntuación
+      val cerosEnTablero = contarCeros(tableroActualizado)
+      val puntosNuevos = if (especial) {
+        if (valorSeleccionado == 7) {
+          cerosEnTablero + 5 + (cerosEnTablero / 10)
+        } else if (valorSeleccionado == 8) {
+          cerosEnTablero + 10 + (cerosEnTablero / 10)
+        } else {
+          cerosEnTablero + 15 + (cerosEnTablero / 10)
+        }
+      } else {
+        cerosEnTablero + (cerosEnTablero / 10)
+      }
       // Se cuentan los 0 que hay en el tablero
-      val puntos = nPuntos + contarCeros(tableroActualizado)
+      val casillasSeleccionadas = contarCeros(tableroActualizado)
+      val puntos = nPuntos + (puntosNuevos * dificultad)
       // Si solo se ha conseguido un punto se resta una vida
-      if (puntos - nPuntos == 1){
-        imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
+      if (casillasSeleccionadas == 1){
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas - 1, nPuntos, puntosNuevos)
         // Se llama recursivamente a la funcion partida
         partidaManual(gravedad(tableroActualizado, nVidas - 1, puntos), nVidas - 1, puntos)
       }
-      else if (puntos - nPuntos < 5){
-        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+      else if (casillasSeleccionadas < 5){
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas, nPuntos, puntosNuevos)
         // Se llama recursivamente a la funcion partida
         partidaManual(gravedad(tableroActualizado, nVidas, puntos), nVidas, puntos)
       }
       else {
-        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas, nPuntos, puntosNuevos)
         // se inserta la casilla especial: bomba, tnt o rompecabezas
         val tableroEspecial = if(!especial){
-          insertarEspecial(tableroActualizado, puntos - nPuntos, coordenadas._1, coordenadas._2)
+          insertarEspecial(tableroActualizado, casillasSeleccionadas, coordenadas._1, coordenadas._2)
         } else {
           tableroActualizado
         }
@@ -56,6 +71,7 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
       val buscar = buscarCoordenadaIdeal(tablero,1,1,1,1,filas,columnas,0,visitados)
       // Se guardan las coordenadas ideales, que son las dos primeras variables del resultado de la funcion
       val coordenadas = (buscar._1,buscar._2)
+      val valorSeleccionado = getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))
       println("Coordenadas seleccionadas: " + coordenadas._1 + " " + coordenadas._2)
       // Se actualiza el tablero con las casillas adyacentes que sean iguales a la seleccionada dando el valor 0
       val (tableroActualizado, especial) = if (0 < getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) && getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1)) < 7) {
@@ -63,28 +79,42 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
       } else {
         (borrarSeleccionEspecial(tablero, coordenadas._1, coordenadas._2, getElem(tablero, (coordenadas._1 - 1) * columnas + (coordenadas._2 - 1))), true)
       }
+      // puntuación
+      val cerosEnTablero = contarCeros(tableroActualizado)
+      val puntosNuevos = if (especial) {
+        if (valorSeleccionado == 7) {
+          cerosEnTablero + 5 + (cerosEnTablero / 10)
+        } else if (valorSeleccionado == 8) {
+          cerosEnTablero + 10 + (cerosEnTablero / 10)
+        } else {
+          cerosEnTablero + 15 + (cerosEnTablero / 10)
+        }
+      } else {
+        cerosEnTablero + (cerosEnTablero / 10)
+      }
       // Se cuentan los 0 que hay en el tablero
-      val puntos = nPuntos + contarCeros(tableroActualizado)
+      val casillasSeleccionadas = contarCeros(tableroActualizado)
+      val puntos = nPuntos + (puntosNuevos * dificultad)
       // Si solo se ha conseguido un punto se resta una vida
-      if (puntos - nPuntos == 1) {
-        imprimirTablero(tableroActualizado, -1, -1, nVidas - 1, puntos)
+      if (casillasSeleccionadas == 1) {
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas, nPuntos, puntosNuevos)
         // Se hace sleep para que el usuario pueda ver el tablero
         Thread.sleep(2500)
         // Se llama recursivamente a la funcion partida
         partidaAutomatica(gravedad(tableroActualizado, nVidas - 1, puntos), nVidas - 1, puntos)
       }
-      else if (puntos - nPuntos < 5) {
-        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+      else if (casillasSeleccionadas < 5) {
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas, nPuntos, puntosNuevos)
         // Se hace sleep para que el usuario pueda ver el tablero
         Thread.sleep(2500)
         // Se llama recursivamente a la funcion partida
         partidaAutomatica(gravedad(tableroActualizado, nVidas, puntos), nVidas, puntos)
       }
       else {
-        imprimirTablero(tableroActualizado, -1, -1, nVidas, puntos)
+        imprimirTableroConPuntosObtenidos(tableroActualizado, -1, -1, nVidas, nPuntos, puntosNuevos)
         // se inserta la casilla especial: bomba, tnt o rompecabezas
         val tableroEspecial = if (!especial) {
-          insertarEspecial(tableroActualizado, puntos - nPuntos, coordenadas._1, coordenadas._2)
+          insertarEspecial(tableroActualizado, casillasSeleccionadas, coordenadas._1, coordenadas._2)
         } else {
           tableroActualizado
         }
@@ -543,6 +573,42 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
       for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
       println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
       imprimirTablero(tablero, 0, 0, vidas, puntos) // Llamada recursiva para la siguiente fila
+    }
+  }
+
+  def imprimirTableroConPuntosObtenidos(tablero: List[Int], fila: Int = 0, columna: Int = 0, vidas: Int, puntos: Int, puntosNuevos: Int): Unit = {
+    if (fila >= 0 && columna > 0 && fila < filas && columna < columnas) {
+      imprimirNumero(tablero.head) // Imprimir el valor de la casilla con marco
+      if (columna == columnas - 1) {
+        println("|") // Imprimir el cierre del marco y una nueva línea después de cada fila
+        if (fila < filas - 1) {
+          print("   ")
+          for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
+          println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
+        }
+        imprimirTableroConPuntosObtenidos(tablero.tail, fila + 1, 0, vidas, puntos, puntosNuevos) // Llamada recursiva para la siguiente fila
+      } else {
+        imprimirTableroConPuntosObtenidos(tablero.tail, fila, columna + 1, vidas, puntos, puntosNuevos) // Llamada recursiva para la siguiente columna
+      }
+    } else if (columna == 0 && fila < filas) {
+      printf("%2d ", fila + 1) // Imprimir el número de la fila
+      imprimirNumero(tablero.head)
+      imprimirTableroConPuntosObtenidos(tablero.tail, fila, columna + 1, vidas, puntos, puntosNuevos) // Llamada recursiva para la siguiente columna
+    } else if (fila == filas) {
+      print("   ")
+      for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
+      println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
+      print("  ")
+      println("VIDAS: " + vidas + " | PUNTOS: " + puntos + "   +   " + puntosNuevos + " X" + dificultad + "\n")
+    } else if (fila == -1 && columna == -1) {
+      println("\n\nCANDY CROSH SOGA")
+      print("  ")
+      for (i <- 0 until columnas) printf("  %2d", i + 1) // Imprimir el número de la columna
+      print("\n")
+      print("   ")
+      for (i <- 0 until columnas) print("+---") // Imprimir el marco para las casillas intermedias
+      println("+") // Imprimir el cierre del marco y una nueva línea después de cada fila
+      imprimirTableroConPuntosObtenidos(tablero, 0, 0, vidas, puntos, puntosNuevos) // Llamada recursiva para la siguiente fila
     }
   }
 

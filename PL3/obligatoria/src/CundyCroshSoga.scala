@@ -8,7 +8,8 @@ object CundyCroshSoga {
         val columnas = pedirColumnas()
 
         // creamos el juego
-        val juego = new juego(filas, columnas, nColores)
+        val dificultad = if (nColores == 4) 1 else 2
+        val juego = new juego(filas, columnas, nColores, dificultad)
         //creamos el tablero
         val tablero = juego.inicializarTablero()
         // si el juego es automático, se ejecuta el método partidaAutomatica de la clase juego
