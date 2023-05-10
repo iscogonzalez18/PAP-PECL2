@@ -1,4 +1,5 @@
-import scala.:+
+package interfaz
+
 import scala.util.Random
 
 class Juego(filas: Int, columnas: Int, nColores: Int) {
@@ -45,6 +46,17 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
       println("PUNTUACION: " + nPuntos)
     }
   }
+
+  def actualizar(tablero: List[Int], coordenada1:Int, coordenada2: Int): (List[Int], Boolean) = {
+    val index = (coordenada1 - 1) * columnas + (coordenada2 - 1)
+    val valor = getElem(tablero, index)
+    if (0 < valor && valor < 7) {
+      (borrarSeleccion(tablero, coordenada1, coordenada2, valor), false)
+    } else {
+      (borrarSeleccionEspecial(tablero, coordenada1, coordenada2, valor), true)
+    }
+  }
+
 
   // se empieza la partida y se desarrolla recursivamente
   def partidaAutomatica(tablero: List[Int], nVidas: Int, nPuntos: Int): Unit = {
@@ -326,9 +338,19 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
 
   // obtiene el elemento de una lista en una posicion
   def getElem(lista: List[Int], pos: Int): Int = {
+    if (empty(lista)) {
+      throw new NoSuchElementException("La lista está vacía")
+    } else if (pos == 0) {
+      lista.head
+    } else {
+      getElem(lista.tail, pos - 1)
+    }
+  }
+  /*
+  def getElem(lista: List[Int], pos: Int): Int = {
     if (pos == 0) lista.head
     else getElem(lista.tail, pos - 1)
-  }
+  }*/
 
   // pone el elemento en la posicion de una lista
   def setElem(lista: List[Int], pos: Int, elem: Int): List[Int] = {
@@ -436,7 +458,7 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
   // devuelve la coordenada ideal del tablero para explotar, es decir, la coordenada que explota el mayor numero de bloques
   def buscarCoordenadaIdeal (tablero: List[Int], filaIdeal: Int, columnaIdeal: Int, filaABuscar: Int, columnaABuscar: Int, filas: Int, columnas: Int, max: Int, visitados: List[Int]): (Int, Int, List[Int]) = {
     // si se han visitado todas las posiciones del tablero se devuelve la coordenada ideal, además de las posiciones visitadas
-    if (tamano(visitados) == (filas * columnas)) {
+    if (visitados.length == (filas * columnas)) {
       (filaIdeal, columnaIdeal, visitados)
     } else {
       // si no
@@ -582,5 +604,9 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
     }
   }
 
+  def inicializarLista(): List[Int] = {
+    val lista = List()
+    lista
+  }
 
 }
