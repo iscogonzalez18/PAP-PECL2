@@ -57,7 +57,7 @@ public class Tablero implements ActionListener {
         //se inicializan los botones y todos los componentes visuales
         casillas = new JButton[filas][columnas];
 
-        frame = new JFrame("CCS");
+        frame = new JFrame("Cundy Crosh Soga");
         frame.setSize(1200, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
@@ -78,7 +78,8 @@ public class Tablero implements ActionListener {
                 // se ajusta el tamaño de cada boton
                 button.setPreferredSize(new Dimension(1200 / filas, 550 / columnas));
                 // se obtiene el valor de la casilla en la posicion i,j
-                Object valor = tablero.apply((filas*i)+j);
+                int index = (filas*i)+j;
+                Object valor = juego.getElem(tablero, index);
                 int value = ((Integer) valor).intValue();
                 // se asigna el color correspondiente depndiendo del valor que tenga esa posicion en el tablero
                 switch (value){
@@ -201,7 +202,8 @@ public class Tablero implements ActionListener {
             for (int i = 0; i < filas; i++) {
                 for (int j = 0; j < columnas; j++) {
                     JButton button = casillas[i][j];
-                    Object valor = tablero.apply((filas * i) + j);
+                    int index = (filas * i) + j;
+                    Object valor = juego.getElem(tablero, index);
                     int value = ((Integer) valor).intValue();
                     switch (value) {
                         case 1://blue
@@ -319,7 +321,8 @@ public class Tablero implements ActionListener {
             for (int i = 0; i <filas; i++) {
                 for (int j = 0; j < columnas; j++) {
                     JButton button = casillas[i][j];
-                    Object valor = tablero.apply((filas*i)+j);
+                    int index = (filas*i)+j;
+                    Object valor = juego.getElem(tablero,index);
                     int value = ((Integer) valor).intValue();
                     switch (value){
                         case 1://blue
@@ -387,7 +390,7 @@ public class Tablero implements ActionListener {
             }
         }
         else{
-            // si no hay vidas se cambia el valor de la variable jugar a false para que no vuelva a entrar en el bucle
+            // si no hay vidas se cambia el valor de lavariable jugar a false para que no vuelva a entrar en el bucle
             jugar=false;
 
         }
