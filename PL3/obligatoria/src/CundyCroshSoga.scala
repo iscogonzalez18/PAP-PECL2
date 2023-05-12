@@ -2,6 +2,7 @@ object CundyCroshSoga {
 
     def main(args: Array[String]): Unit = {
         // pedimos los datos de la partida
+        val jugador = pedirJugador()
         val modo = pedirModo()
         val nColores = pedirDificultad()
         val filas = pedirFilas()
@@ -9,7 +10,7 @@ object CundyCroshSoga {
 
         // creamos el juego
         val dificultad = if (nColores == 4) 1 else 2
-        val juego = new juego(filas, columnas, nColores, dificultad)
+        val juego = new juego(filas, columnas, nColores, dificultad, jugador)
         //creamos el tablero
         val tablero = juego.inicializarTablero()
         // si el juego es automático, se ejecuta el método partidaAutomatica de la clase juego
@@ -18,6 +19,17 @@ object CundyCroshSoga {
         else juego.partidaManual(tablero, 3, 0)
     }
 
+    // método para pedir por pantalla el nombre del jugador
+    def pedirJugador () : String = {
+        println("Introduzca su nombre:")
+        val jugador = scala.io.StdIn.readLine()
+        if (jugador == "") {
+            println("Error: valor no válido")
+            pedirJugador()
+        }
+        jugador
+    }
+    
     // método para pedir por pantalla el modo de la partida
     def pedirModo () : String = {
         println("Seleccione modo de juego (a: automático, m: manual):")

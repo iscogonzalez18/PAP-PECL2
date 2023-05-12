@@ -1,10 +1,18 @@
+import java.sql.{Connection, DriverManager, ResultSet}
 import scala.:+
 import scala.util.Random
-class juego(filas: Int, columnas: Int, nColores: Int, dificultad: Int) {
+import java.time.LocalTime
+import java.time.Instant
+import java.time.Duration
+
+class juego(filas: Int, columnas: Int, nColores: Int, dificultad: Int, jugador : String) {
   val random = new Random()
+  val tiempoInicial = LocalTime.now()
 
   // se empieza la partida manual y se desarrolla recursivamente
   def partidaManual( tablero: List[Int], nVidas: Int, nPuntos: Int ): Unit = {
+    // Variable para contar el tiempo de la partida
+
     // Se comprueba el numero de vidas restantes
     if (nVidas > 0){
       // Se piden las coordenadas de la casilla a seleccionar
@@ -57,6 +65,12 @@ class juego(filas: Int, columnas: Int, nColores: Int, dificultad: Int) {
     } else {
       println("GAME OVER")
       println("PUNTUACION: " + nPuntos)
+      // Se para el tiempo de la partida
+      val tiempoFinal = LocalTime.now()
+      val duracion = Duration.between(tiempoInicial, tiempoFinal)
+      val minutes = duracion.toMinutes
+      val seconds = duracion.getSeconds - (minutes * 60)
+      enviarPuntuacion(jugador, nPuntos, minutes, seconds)
     }
   }
 
@@ -126,7 +140,41 @@ class juego(filas: Int, columnas: Int, nColores: Int, dificultad: Int) {
     } else {
       println("GAME OVER")
       println("PUNTUACION: " + nPuntos)
+      // Se para el tiempo de la partida
+      val tiempoFinal = LocalTime.now()
+      val duracion = Duration.between(tiempoInicial, tiempoFinal)
+      val minutes = duracion.toMinutes
+      val seconds = duracion.getSeconds - (minutes * 60)
+      enviarPuntuacion(jugador, nPuntos, minutes, seconds)
     }
+  }
+
+  def enviarPuntuacion(jugador: String, puntos: Int, minutos: Any, segundos: Any): Unit = {
+    val dificultadQuery = if (dificultad == 2) {"Dificil"} else {"Facil"}
+    val url = "jdbc:postgresql://candycroshsoga.postgres.database.azure.com:5432/ccs?sslmode=require&user=Estudiante@candycroshsoga&password=Pa55w0rd1234"
+
+    // Establecer la conexión a la base de datos
+    val connection = DriverManager.getConnection(url)
+
+    try {
+      // Crear una declaración SQL para insertar los datos
+      val statement = connection.createStatement()
+      val query = s"INSERT INTO puntuaciones (nombre, puntuacion, dificultad, dimension, duracion) VALUES ( '$jugador', $puntos, '$dificultadQuery', '${filas}X${columnas}', '${minutos.toString}:${segundos.toString}' )"
+      println(query)
+      // Ejecutar la consulta de inserción
+      statement.executeUpdate(query)
+
+      // Imprimir un mensaje de éxito
+      println("Datos insertados correctamente")
+
+    } catch {
+      case e: Exception => e.printStackTrace()
+    }
+
+    // Cerrar la conexión a la base de datos
+    connection.close()
+
+    println("Puntuacion enviada")
   }
 
   def borrarSeleccion(tablero: List[Int], fila:Int, columna: Int, n: Int): List[Int] = {
