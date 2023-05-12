@@ -1,7 +1,5 @@
-import scala.:+
 import scala.util.Random
-
-class Juego(filas: Int, columnas: Int, nColores: Int) {
+class juego(filas: Int, columnas: Int, nColores: Int) {
   val random = new Random()
 
   // se empieza la partida manual y se desarrolla recursivamente
@@ -50,11 +48,9 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
   def partidaAutomatica(tablero: List[Int], nVidas: Int, nPuntos: Int): Unit = {
     // Se comprueba el numero de vidas restantes
     if (nVidas > 0) {
-      // Se buscan las coordenadas ideales para explotar bloques, las que mas puntos den
-      // Para eso, se crea una lista de coordenadas que se van visitando y para incluir en la funcion de buscar coordenadas ideales
-      val visitados: List[Int] = List()
-      // Se llama a la funcion de buscar coordenadas ideales
-      val buscar = buscarCoordenadaIdeal(tablero,1,1,1,1,filas,columnas,0,visitados)
+
+      // Se llama a la funcion de buscar coordenadas aleatoria
+      val buscar = coordenadaAleatoria(tablero)
       // Se guardan las coordenadas ideales, que son las dos primeras variables del resultado de la funcion
       val coordenadas = (buscar._1,buscar._2)
       println("Coordenadas seleccionadas: " + coordenadas._1 + " " + coordenadas._2)
@@ -98,6 +94,10 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
       println("GAME OVER")
       println("PUNTUACION: " + nPuntos)
     }
+  }
+
+  def coordenadaAleatoria(tablero: List[Int]): (Int,Int) = {
+    (Random.nextInt(filas) + 1, Random.nextInt(columnas) + 1)
   }
 
   def borrarSeleccion(tablero: List[Int], fila:Int, columna: Int, n: Int): List[Int] = {
@@ -349,140 +349,6 @@ class Juego(filas: Int, columnas: Int, nColores: Int) {
     else false
   }
 
-
-  // devuelve el numero de adyacenetes iguales de una posicion cuyo valor no es especial y una lista con las posiciones de los adyacentes visitados
-  def numIgualesAdyacentes(tablero: List[Int], fila: Int, columna: Int, filas: Int, columnas: Int, num: Int, previos: List[Int]): (List[Int], List[Int]) = {
-    // posicion actual de la que se comprobaran los adyacentes
-    val actual = (fila - 1) * columnas + (columna - 1)
-    // fila y columna de la posicion actual pero menos 1 para que empiecen en 0
-    val filaComprobar = fila - 1
-    val columnaComprobar = columna - 1
-
-    // se comprueban si hay adyacentes de la posicion actual. si es asi se le da el valor de la posicion en la lista y si no se devuelve -1
-    val arriba = if (fila > 1) (filaComprobar - 1) * columnas + columnaComprobar else -1
-    val abajo = if (fila < filas) (filaComprobar + 1) * columnas + columnaComprobar else -1
-    val izquierda = if (columna > 1) filaComprobar * columnas + (columnaComprobar - 1) else -1
-    val derecha = if (columna < columnas) filaComprobar * columnas + (columnaComprobar + 1) else -1
-
-    // se añade la posicion actual a la lista de posiciones visitadas
-    val pLista = actual :: previos
-
-    // se añade un 0 a la psoicion del tablero para contarlo luego
-    val tableroAux = setElem(tablero, actual, 0)
-
-
-    // se comprueba para cada adyacente si hay adyacente, si es igual al numero de la posicion actual y si no se ha visitado ya
-    // si se cumple se llama a la funcion recursivamente con la posicion del adyacente y se suma 1 al numero de adyacentes iguales y se devuelve la lista de posiciones visitadas
-    // si no se cumple se devuelve 0 y la lista de posiciones visitadas
-    // se hace para el adyacente de arriba
-
-    val (arribaI,previosNuevo) =
-      if (arriba != -1 && getElem(tableroAux,arriba) == num && !contains(pLista,arriba)) {
-        numIgualesAdyacentes(tableroAux, fila - 1, columna, filas, columnas, num, pLista)
-      }
-      else (tableroAux,pLista)
-
-    // se hace para el adyacente de abajo
-    val (abajoI, previosNuevo2) =
-      if (abajo != -1 && getElem(arribaI,abajo)  == num && !contains(previosNuevo,abajo)) {
-        numIgualesAdyacentes(arribaI, fila + 1, columna, filas, columnas, num, previosNuevo)
-      }
-      else (arribaI,previosNuevo)
-
-    // se hace para el adyacente de la izquierda
-    val (izquierdaI, previosNuevo3) =
-      if (izquierda != -1 && getElem(abajoI,izquierda) == num && !contains(previosNuevo2,izquierda)) {
-        numIgualesAdyacentes(abajoI, fila, columna - 1, filas, columnas, num, previosNuevo2)
-      } else (abajoI,previosNuevo2)
-
-    // se hace para el adyacente de la derecha
-    val (derechaI, previosNuevo4) =
-      if (derecha != -1 && getElem(izquierdaI,derecha) == num && !contains(previosNuevo3,derecha)) {
-        numIgualesAdyacentes(izquierdaI, fila, columna + 1, filas, columnas, num, previosNuevo3)
-      }
-      else (izquierdaI,previosNuevo3)
-
-    //finalmente en estas variables se guardan el numero de adyacentes iguales y la lista de posiciones visitadas despues del proceso y todas las llamadas recursivas
-    (derechaI, previosNuevo4)
-  }
-
-  // devuelve una lista con los bloques explotados
-  def hipoteticosExplotados(tablero: List[Int], fila: Int, columna: Int): List[Int] = {
-    // valor de la posicion actual que queremos explotar
-    val n = getElem(tablero, (fila - 1) * columnas + (columna - 1))
-
-    val actualizado = n match {
-      // si es una bomba se llama a la funcion de explotar una bomba y se devuelve el numero de bloques explotados
-      case 7 => {
-        bomba(tablero, fila, columna)
-      }
-      // si es un tnt se llama a la funcion de explotar un tnt y se devuelve el numero de bloques explotados
-      case 8 => {
-        tnt(tablero, 0, fila, columna)
-      }
-      // si es un rompecabezas se llama a la funcion de explotar un rompecabezas y se devuelve el numero de bloques explotados
-      // se consideran todos los rompecabezas posibles (10, 20, 30, 40, 50, 60)
-      case 10 | 20 | 30 | 40 | 50 | 60 => {
-        rompecabezas(tablero, n)
-      }
-      case _ => {
-        // Si el valor no es una bomba, TNT o rompecabezas, se devuelve una lista vacía
-        List.empty[Int]
-      }
-    }
-    actualizado
-  }
-
-  // devuelve la coordenada ideal del tablero para explotar, es decir, la coordenada que explota el mayor numero de bloques
-  def buscarCoordenadaIdeal (tablero: List[Int], filaIdeal: Int, columnaIdeal: Int, filaABuscar: Int, columnaABuscar: Int, filas: Int, columnas: Int, max: Int, visitados: List[Int]): (Int, Int, List[Int]) = {
-    // si se han visitado todas las posiciones del tablero se devuelve la coordenada ideal, además de las posiciones visitadas
-    if (tamano(visitados) == (filas * columnas)) {
-      (filaIdeal, columnaIdeal, visitados)
-    } else {
-      // si no
-      // se crea una copia del tablero para no modificar el original
-      // val tableroParaComprobar = tablero.toList
-      // se obtiene la posicion actual
-      val actual = (filaABuscar-1) * columnas + (columnaABuscar-1)
-      // se obtiene el valor de la posicion actual
-      val num = getElem(tablero, actual)
-
-      // le damos valor a las variables adyacentesActual que nos dira la cantidad de adyacentes iguales tiene y lista que nos dira las posiciones visitadas hasta el momento
-      // si el numero es un especial se llama a la funcion hipoteticosExplotados
-      // si no se llama a la funcion numIgualesAdyacentes
-      val (tableroAct, lista) =
-        if (num > 0 && num < 7 && !contains(visitados,actual)) {
-          numIgualesAdyacentes(tablero, filaABuscar, columnaABuscar, filas, columnas, num, visitados)
-        } else if (num==7 || num ==8 || num==10 || num == 20 || num == 30 || num == 40 || num == 50 || num == 60) {
-          (
-            hipoteticosExplotados(tablero, filaABuscar, columnaABuscar), actual::visitados)
-        } else {
-          (List(), visitados)
-        }
-
-      // se obtiene el numero de adyacentes contando los ceros
-      val adyacentesActual = contarCeros(tableroAct)
-
-      // si el numero de adyacentes calculado es mayor que el maximo por el momento
-      // se hace la llamada recursiva actualizando el maximo y la fila y columna ideales
-      if (adyacentesActual > max) {
-        // comprobamos si estamos en la ultima columna para saber si tenemos que buscar en la siguiente fila o en la misma
-        if (columnaABuscar == columnas) {
-          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar + 1, 1, filas, columnas, adyacentesActual,lista) // se busca en la siguiente fila
-        } else {
-          buscarCoordenadaIdeal(tablero, filaABuscar, columnaABuscar, filaABuscar, columnaABuscar + 1, filas, columnas, adyacentesActual, lista)
-        }
-      } // si no se hace la llamada recursiva sin actualizar el maximo ni la fila y columna ideales
-      else {
-        // comprobamos si estamos en la ultima columna para saber si tenemos que buscar en la siguiente fila o en la misma
-        if (columnaABuscar == columnas) {
-          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar + 1, 1, filas, columnas, max, lista) // se busca en la siguiente fila
-        } else {
-          buscarCoordenadaIdeal(tablero, filaIdeal, columnaIdeal, filaABuscar, columnaABuscar + 1, filas, columnas, max, lista)
-        }
-      }
-    }
-  }
 
 
   // devuelve el numero de ceros de una lista

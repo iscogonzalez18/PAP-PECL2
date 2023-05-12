@@ -37,6 +37,7 @@ public class InicioJuego implements ActionListener {
     }
 
     public void jbInit () {
+        // Crear el frame y crear los componentes
         frame = new JFrame("Cundy Crosh Soga");
         frame.setResizable(false);
         frame.setContentPane(panelInicio);
