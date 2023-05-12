@@ -159,8 +159,11 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
 
   // ponemos a cero todas las casillas de la fila y la columna de la casilla seleccionada recusivamente
   def bomba(tablero: List[Int], fila: Int, columna: Int): List[Int] = {
+    // se van concatenando las filas hasta la seleccionada donde se concatena una fila de ceros
     val tableroBombaFila = filaBomba(tablero, fila, 1)
+    // se coge una columna y se concatena con la siguiente hasta la seleccionada donde se concatena una columna de ceros
     val tableroBombaColumna = columnaBomba(tableroBombaFila, columna, 1)
+    // se tiene el tablero traspuesto
     tableroBombaColumna
   }
 
@@ -176,7 +179,7 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
     else concatenarListas(getColumna(i,tablero), columnaBomba(tablero, columna, i + 1))
   }
 
-  // pone a cero las casillas que se encuentren en un radio de 4 casillas de la casilla seleccionada
+  // pone a cero las casillas que se encuentren en un radio de 4 casillas de la casilla seleccionada, la iteracion se hace casilla en casilla
   def tnt(tablero: List[Int], pos: Int, fila: Int, columna: Int): List[Int] = {
     if (tablero == Nil) Nil
     else if(( pos / columnas + 1) > fila - 4 && ( pos / columnas + 1) < fila + 4 && (pos % columnas + 1) > columna - 4 && (pos % columnas + 1) < columna + 4) {
@@ -185,6 +188,7 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
     else concatenarListas(toma(1, tablero), tnt(deja(1, tablero), pos + 1, fila, columna))
   }
 
+  // pone a cero las casillas que seleccione el rompecabezas, la iteracion se hace de casilla en casilla
   def rompecabezas( tablero: List[Int], n: Int): List[Int] = {
     if (tablero == Nil) Nil
     else if (tablero.head == n / 10 || tablero.head == n) concatenarListas(generar0(1,0), rompecabezas(deja(1, tablero), n))
@@ -210,7 +214,11 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
 
   def gravedad( tablero: List[Int], vidas: Int, puntos: Int): List[Int] = {
     val tableroCuadrado = if (filas == columnas) tablero else rellenarTablero(tablero)
+    // coge una columna, pone los ceros al principio y la concatena con la siguiente columna
+    // se le pasa como parámetro una función, la cual tiene otra función auxiliar
     val tableroGravedad = gravedadColumnas(subirCeros, tableroCuadrado, 1)
+    // se traspone el tablero rellenando las columnas con ceros
+    // la funcion randomNumeros se le pasa como parámetro una función
     val tableroActualizado = randomNumeros(random.nextInt(nColores) + 1, traspuesta(tableroGravedad))
     // se vuelve a quitar el exceso de filas o columnas
     val tableroFinal = if (filas == columnas) tableroActualizado else quitarNueves(tableroActualizado)
@@ -269,7 +277,7 @@ class juego(filas: Int, columnas: Int, nColores: Int) {
     else getFila(fila - 1, deja(columnas, l))
   }
 
-  // genera una lista de n elementos 0
+  // genera una lista de n ceros y a nueves
   def generar0(n: Int, a: Int): List[Int] = {
     if (a == 0 && n == 0) Nil
     else if (n == 0) 9 :: generar0(n, a - 1)
